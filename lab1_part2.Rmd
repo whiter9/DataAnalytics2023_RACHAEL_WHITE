@@ -1,0 +1,34 @@
+---
+title: "Lab 1 Part 2"
+author: "Rachael White"
+output: html_notebook
+---
+
+Multivariate Regression in R
+
+```{r}
+# set working directory and 
+# read data
+multivariate <-read.csv("multivariate.csv")
+head(multivariate)
+
+```
+```{r}
+summary(multivariate)
+```
+
+```{r}
+# generate linear regression of homeowners on immigrant
+mm <-lm(Homeowners~Immigrant, data = multivariate)
+#summary(mm)
+summary(mm)$coef 
+
+```
+```{r}
+install.packages("Rtools")
+install.packages("ggplot2")
+install.packages("dplyr")
+library(ggplot2)
+library(dplyr)
+```
+
