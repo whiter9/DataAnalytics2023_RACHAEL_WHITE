@@ -1,0 +1,253 @@
+---
+title: "Lab 2 Part 1"
+author: "Rachael White"
+output: html_notebook
+---
+
+EPI data:
+
+```{r}
+# set working directory and 
+# read data
+EPI_data <- read.csv(file="2010EPI_data.csv", skip=1,header=T)
+#or
+#EPI_data <- read.xlsx(”<path>/2010EPI_data.xlsx")
+# Note: replace default data frame name – cannot start with numbers!
+head(EPI_data)
+
+```
+
+Part 1a
+
+```{r}
+#Define objects for variables of interest
+AIR_E <- EPI_data$AIR_E
+WATER_E <- EPI_data$WATER_E
+NOX_pt <- EPI_data$NOX_pt
+SO2_pt <- EPI_data$SO2_pt
+OZONE_pt <- EPI_data$OZONE_pt
+WQI_pt <- EPI_data$WQI_pt
+CLIMATE <- EPI_data$CLIMATE
+AGRICULTURE <- EPI_data$AGRICULTURE
+FISHERIES <- EPI_data$FISHERIES
+NMVOC_pt <- EPI_data$NMVOC_pt
+  
+```
+
+```{r}
+#Generate central tendency values
+summary(AIR_E)
+```
+
+```{r}
+#Generate central tendency values
+summary(WATER_E)
+```
+
+```{r}
+#Generate boxplot
+boxplot(AIR_E)
+```
+
+```{r}
+#Generate boxplot
+boxplot(WATER_E)
+
+```
+
+```{r}
+#Generate central tendency values
+summary(NOX_pt)
+```
+
+```{r}
+#Generate central tendency values
+summary(SO2_pt)
+```
+```{r}
+#Generate boxplot
+boxplot(OZONE_pt)
+
+```
+
+```{r}
+#Generate boxplot
+boxplot(WQI_pt)
+
+```
+
+```{r}
+#Generate central tendency values
+summary(CLIMATE)
+```
+
+```{r}
+#Generate central tendency values
+summary(AGRICULTURE)
+```
+
+```{r}
+#Generate boxplot
+boxplot(FISHERIES)
+
+```
+
+```{r}
+#Generate boxplot
+boxplot(NMVOC_pt)
+
+```
+
+Part 1b: Regression Exercises
+
+```{r}
+#Linear Regression of ENVHEALTH on DALY, AIR_H, and WATER_H
+ENVHEALTH <- EPI_data$ENVHEALTH
+DALY <- EPI_data$DALY
+AIR_H <- EPI_data$AIR_H
+WATER_H <- EPI_data$WATER_H
+
+boxplot(ENVHEALTH,DALY,AIR_H,WATER_H)
+```
+
+```{r}
+lmENVH <- lm(ENVHEALTH~DALY+AIR_H+WATER_H)
+```
+
+```{r}
+lmENVH
+```
+```{r}
+summary(lmENVH)
+```
+```{r}
+#Model coefs
+cENVH <- coef(lmENVH)
+cENVH
+```
+
+```{r}
+# Use linear model to make predictions 
+# based on new independent variable inputs
+DALYNEW <- c(seq(5,95,5))
+AIRHNEW <- c(seq(5,95,5))
+WATERHNEW <- c(seq(5,95,5))
+
+# When using the predict() function in R, the column names in 'newdata' 
+# should exactly match the column names in the original data frame used to build the model.
+# The predict() function uses the column names 
+# to match the predictors in the model to the variables in the new data frame.
+# So we declare the column names explicitly:
+NEW <- data.frame(DALY = DALYNEW,AIR_H = AIRHNEW,WATER_H = WATERHNEW)
+
+# now we can use the model to predict
+pENV <- predict(lmENVH, NEW, interval="prediction")
+cENV <- predict(lmENVH, NEW, interval="confidence")
+```
+
+```{r}
+#tolerance estimates for the new data
+pENV
+```
+
+```{r}
+#confidence interval estimates for the new data
+cENV
+```
+Repeated analysis using the response variable as: AIR_E
+
+```{r}
+Model1 <- lm(AIR_E ~DALY+AIR_H+WATER_H)
+summary(Model1)
+```
+```{r}
+# Use linear model to make predictions 
+# based on new independent variable inputs
+pENV <- predict(Model1, NEW, interval="prediction")
+cENV <- predict(Model1, NEW, interval="confidence")
+```
+
+```{r}
+#tolerance estimates for the new data
+pENV
+```
+
+```{r}
+#confidence interval estimates for the new data
+cENV
+```
+
+Repeated analysis using the response variable as: CLIMATE
+
+```{r}
+Model2 <- lm(CLIMATE~DALY+AIR_H+WATER_H)
+summary(Model2)
+```
+
+```{r}
+# Use linear model to make predictions 
+# based on new independent variable inputs
+pENV <- predict(Model2, NEW, interval="prediction")
+cENV <- predict(Model2, NEW, interval="confidence")
+
+```
+
+Model Interpretation
+
+We can evaluate the models 1-3 based on their respective multiple R squared values. 
+
+Multiple R squared values near 0 represent a regression that does not explain the variance in the response variable well, and a regression with an R2 value close to 1 does explain the observed variance in the response variable well. 
+
+In our examples, the model obtained with the highest R2 value is the first model for ENVHEALTH, with an R2 value of 1. The R2s for the other models are much lower. We can interpret this as meaning that the first model generated does the best job at explaining the relationships between the tested dependent and independent variables. Specifically, for the best model, roughly 100% of the variance found in the response variable (ENVHEALTH) can be explained by the predictor variables used to build the model (DALY, AIR_H, WATER_H).
+
+
+
+Part 1c: Shapiro-Wilk Normality Testing
+
+Explore normality of ENVHEALTH
+
+```{r}
+#First we check that the sample size is appropriate for the test (3-5000 values):
+tf <- is.na(ENVHEALTH) # records True values if the value is NA
+ENVHEALTH_clean <- ENVHEALTH[!tf] # filters out NA values, new array
+
+str(ENVHEALTH_clean)
+```
+This data sample has 163 values, so OK to use Shapiro test on it
+
+```{r}
+shapiro.test(ENVHEALTH)
+```
+
+Interpretation:
+
+The test returned a p-value <<0.05. That is, based on this test, we can reject the null hypothesis that the distribution of ENVHEALTH variable is normal. The distribution likely departs from normality.
+
+
+Explore normality of ECOSYSTEM:
+
+```{r}
+#First we check that the sample size is appropriate for the test:
+ECOSYSTEM <- EPI_data$ECOSYSTEM
+tf <- is.na(ECOSYSTEM) # records True values if the value is NA
+ECO_clean <- ECOSYSTEM[!tf] # filters out NA values, new array
+
+str(ECO_clean)
+
+```
+
+This data sample has 163 values, so OK to use Shapiro test on it
+
+```{r}
+ECOSYSTEM <- EPI_data$ECOSYSTEM
+shapiro.test(ECOSYSTEM)
+```
+
+Interpretation:
+
+The test returned a p-value < 0.05. That is, based on this test, we can reject the null hypothesis that the distribution of the ECOSYSTEM variable is normal. The distribution likely departs from normality.
+
+
+Repeat Shapiro testing with the EPI.csv dataset:
+
+
